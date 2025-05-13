@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import MenuSection from './components/MenuSection';
 import Cart from './components/Cart';
@@ -36,9 +36,25 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   // Estado para gerenciar os itens do menu (dinâmico)
-  const [menu, setMenu] = useState(menuItems);
+  const [menu, setMenu] = useState(null);
   // Estado para identificar a mesa
   const [selectedTable, setSelectedTable] = useState('');
+
+  // Carrega o menu do backend ao iniciar
+  useEffect(() => {
+    fetch('https://menu-backend-production-350b.up.railway.app/api/menu')
+      .then(res => res.json())
+      .then(data => setMenu(data));
+  }, []);
+
+  // Atualiza o menu no backend sempre que mudar
+  const updateMenuOnServer = (newMenu) => {
+    fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newMenu)
+    });
+  };
 
   // Função para adicionar item ao carrinho
   const addToCart = (item, category) => {
@@ -108,18 +124,26 @@ function App() {
 
   // Rota para adicionar item ao menu
   const addMenuItem = (category, newItem) => {
-    setMenu(prev => ({
-      ...prev,
-      [category]: [...prev[category], { ...newItem, id: Date.now() }]
-    }));
+    setMenu(prev => {
+      const updated = {
+        ...prev,
+        [category]: [...prev[category], { ...newItem, id: Date.now() }]
+      };
+      updateMenuOnServer(updated);
+      return updated;
+    });
   };
 
   // Rota para remover item do menu
   const removeMenuItem = (category, id) => {
-    setMenu(prev => ({
-      ...prev,
-      [category]: prev[category].filter(item => item.id !== id)
-    }));
+    setMenu(prev => {
+      const updated = {
+        ...prev,
+        [category]: prev[category].filter(item => item.id !== id)
+      };
+      updateMenuOnServer(updated);
+      return updated;
+    });
   };
 
   return (
@@ -154,34 +178,34 @@ function App() {
               setSelectedTable={setSelectedTable}
             />
             <main className="menu-container">
-              <MenuSection 
+              {menu && <MenuSection 
                 title="Entradas" 
                 items={menu.entradas} 
                 onAddToCart={addToCart} 
                 category="entradas" 
-              />
-              <MenuSection 
+              />}
+              {menu && <MenuSection 
                 title="Pratos Principais" 
                 items={menu.pratosPrincipais} 
                 onAddToCart={addToCart} 
                 category="pratosPrincipais" 
-              />
-              <MenuSection 
+              />}
+              {menu && <MenuSection 
                 title="Sobremesas" 
                 items={menu.sobremesas} 
                 onAddToCart={addToCart} 
                 category="sobremesas" 
-              />
-              <MenuSection 
+              />}
+              {menu && <MenuSection 
                 title="Bebidas" 
                 items={menu.bebidas} 
                 onAddToCart={addToCart} 
                 category="bebidas" 
-              />
+              />}
             </main>
           </div>
         } />
-        <Route path="/admin" element={<AdminMenu menu={menu} addMenuItem={addMenuItem} removeMenuItem={removeMenuItem} />} />
+        <Route path="/admin" element={menu ? <AdminMenu menu={menu} addMenuItem={addMenuItem} removeMenuItem={removeMenuItem} /> : null} />
       </Routes>
     </Router>
   );
