@@ -1,12 +1,27 @@
 import React from 'react';
 
-const Cart = ({ cartItems, isOpen, onClose, onAdjustQuantity, onRemove, onClear, onConfirm, calculateTotal }) => {
+const Cart = ({ cartItems, isOpen, onClose, onAdjustQuantity, onRemove, onClear, onConfirm, calculateTotal, selectedTable, setSelectedTable }) => {
   if (!isOpen) return null;
   return (
     <div className="cart-container">
       <div className="cart-header">
         <h2>Seu Pedido</h2>
         <button className="close-button" onClick={onClose}>×</button>
+      </div>
+      <div style={{ margin: '12px 0 18px 0', textAlign: 'center' }}>
+        <label style={{ fontWeight: 600, color: '#2d3a2e' }}>
+          Mesa:
+          <select
+            value={selectedTable}
+            onChange={e => setSelectedTable(e.target.value)}
+            style={{ marginLeft: 8, padding: '4px 10px', borderRadius: 4, border: '1px solid #e0e0e0', fontWeight: 600 }}
+          >
+            <option value="">Selecione</option>
+            {[...Array(12)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}</option>
+            ))}
+          </select>
+        </label>
       </div>
       {cartItems.length === 0 ? (
         <p className="empty-cart">Seu carrinho está vazio</p>

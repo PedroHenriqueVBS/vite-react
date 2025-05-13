@@ -4,76 +4,7 @@ import MenuSection from './components/MenuSection';
 import Cart from './components/Cart';
 import { calculateTotal } from './utils/cartUtils';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-function AdminMenu({ menu, addMenuItem, removeMenuItem }) {
-  const [category, setCategory] = useState('entradas');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!name || !description || !price) return;
-    // Garante que o valor já seja inserido como BRL
-    let formattedPrice = price.trim();
-    if (!/^R\$/.test(formattedPrice)) {
-      formattedPrice = 'R$ ' + formattedPrice;
-    }
-    addMenuItem(category, { name, description, price: formattedPrice });
-    setName(''); setDescription(''); setPrice('');
-  };
-
-  return (
-    <div className="admin-panel">
-      <h2>Administração do Cardápio</h2>
-      <form className="admin-form" onSubmit={handleAdd}>
-        <div className="admin-form-row">
-          <label>Categoria:
-            <select value={category} onChange={e => setCategory(e.target.value)}>
-              <option value="entradas">Entradas</option>
-              <option value="pratosPrincipais">Pratos Principais</option>
-              <option value="sobremesas">Sobremesas</option>
-              <option value="bebidas">Bebidas</option>
-            </select>
-          </label>
-          <label>Nome:
-            <input value={name} onChange={e => setName(e.target.value)} required />
-          </label>
-        </div>
-        <div className="admin-form-row">
-          <label>Descrição:
-            <input value={description} onChange={e => setDescription(e.target.value)} required />
-          </label>
-          <label>Preço:
-            <input value={price} onChange={e => setPrice(e.target.value)} required placeholder="R$ 00,00" />
-          </label>
-        </div>
-        <button type="submit" className="admin-add-btn">Adicionar Item</button>
-      </form>
-      <h3>Itens do Cardápio</h3>
-      <div className="admin-menu-list">
-        {Object.entries(menu).map(([cat, items]) => (
-          <div key={cat} className="admin-menu-category">
-            <div className="admin-category-title">{cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
-            <ul>
-              {items.map(item => (
-                <li key={item.id} className="admin-menu-item">
-                  <div>
-                    <span className="admin-item-name">{item.name}</span>
-                    <span className="admin-item-price">{item.price}</span>
-                  </div>
-                  <div className="admin-item-desc">{item.description}</div>
-                  <button onClick={() => removeMenuItem(cat, item.id)} className="admin-remove-btn">Remover</button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <Link to="/" className="admin-back-link">Voltar para o site</Link>
-    </div>
-  );
-}
+import AdminMenu from './admin/AdminMenu';
 
 function App() {
   const menuItems = {
@@ -106,6 +37,8 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   // Estado para gerenciar os itens do menu (dinâmico)
   const [menu, setMenu] = useState(menuItems);
+  // Estado para identificar a mesa
+  const [selectedTable, setSelectedTable] = useState('');
 
   // Função para adicionar item ao carrinho
   const addToCart = (item, category) => {
@@ -157,7 +90,7 @@ function App() {
   // Função para montar mensagem do pedido para o WhatsApp
   const buildOrderMessage = () => {
     if (cartItems.length === 0) return '';
-    let message = '*Novo pedido para a cozinha*%0A';
+    let message = `*Novo pedido para a cozinha*%0AMesa: ${selectedTable || 'NÃO INFORMADA'}%0A`;
     cartItems.forEach(item => {
       message += `- ${item.quantity}x ${item.name} (${item.category}) - ${item.price}%0A`;
     });
@@ -217,6 +150,8 @@ function App() {
               onClear={clearCart}
               onConfirm={handleConfirmOrder}
               calculateTotal={() => calculateTotal(cartItems)}
+              selectedTable={selectedTable}
+              setSelectedTable={setSelectedTable}
             />
             <main className="menu-container">
               <MenuSection 
