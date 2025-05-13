@@ -7,31 +7,6 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AdminMenu from './admin/AdminMenu';
 
 function App() {
-  const menuItems = {
-    entradas: [
-      { id: 1, name: 'Bruschetta Tradicional', description: 'Pão italiano tostado com tomates, alho e manjericão', price: 'R$ 18,90' },
-      { id: 2, name: 'Carpaccio', description: 'Finas fatias de carne com molho especial e parmesão', price: 'R$ 29,90' },
-      { id: 3, name: 'Camarão Empanado', description: 'Camarões empanados com molho tártaro', price: 'R$ 32,90' },
-    ],
-    pratosPrincipais: [
-      { id: 1, name: 'Filé Mignon ao Molho Madeira', description: 'Filé mignon grelhado coberto com molho madeira e cogumelos', price: 'R$ 62,90' },
-      { id: 2, name: 'Risoto de Camarão', description: 'Arroz arbóreo cremoso com camarões e ervas finas', price: 'R$ 58,90' },
-      { id: 3, name: 'Feijoada Completa', description: 'Tradicional feijoada com acompanhamentos', price: 'R$ 49,90' },
-      { id: 4, name: 'Salmão Grelhado', description: 'Filé de salmão grelhado com molho de ervas e legumes', price: 'R$ 64,90' },
-    ],
-    sobremesas: [
-      { id: 1, name: 'Petit Gateau', description: 'Bolo quente de chocolate com sorvete de creme', price: 'R$ 22,90' },
-      { id: 2, name: 'Pudim de Leite', description: 'Pudim caseiro com calda de caramelo', price: 'R$ 16,90' },
-      { id: 3, name: 'Cheesecake', description: 'Torta de cream cheese com calda de frutas vermelhas', price: 'R$ 19,90' },
-    ],
-    bebidas: [
-      { id: 1, name: 'Água Mineral', description: 'Com ou sem gás (500ml)', price: 'R$ 6,90' },
-      { id: 2, name: 'Refrigerante', description: 'Diversos sabores (lata)', price: 'R$ 7,90' },
-      { id: 3, name: 'Suco Natural', description: 'Laranja, abacaxi, maracujá ou limão', price: 'R$ 12,90' },
-      { id: 4, name: 'Taça de Vinho', description: 'Tinto, branco ou rosé', price: 'R$ 22,90' },
-    ]
-  };
-
   // Estado para gerenciar os itens no carrinho
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
