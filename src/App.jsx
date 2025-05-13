@@ -104,8 +104,8 @@ function App() {
     // Telefones dos garçons
     const telefones = {
       Clayton: '5583996985997',
-      Thiago: '5583996985998',
-      Maciel: '5583996985999'
+      Thiago: '5583996985997',
+      Maciel: '5583996985997'
     };
     const phone = telefones[garcom] || '5583996985997';
     const message = buildOrderMessage();
