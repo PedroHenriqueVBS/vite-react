@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import './App.css'
+import './App.css';
+import MenuSection from './components/MenuSection';
+import Cart from './components/Cart';
+import { calculateTotal } from './utils/cartUtils';
 
 function App() {
   const menuItems = {
@@ -73,17 +76,28 @@ function App() {
     );
   };
 
-  // Calcula o total do carrinho
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const price = parseFloat(item.price.replace('R$ ', '').replace(',', '.'));
-      return total + price * item.quantity;
-    }, 0).toFixed(2).replace('.', ',');;
-  };
-
   // Função para limpar o carrinho
   const clearCart = () => {
     setCartItems([]);
+  };
+
+  // Função para montar mensagem do pedido para o WhatsApp
+  const buildOrderMessage = () => {
+    if (cartItems.length === 0) return '';
+    let message = '*Novo pedido para a cozinha*%0A';
+    cartItems.forEach(item => {
+      message += `- ${item.quantity}x ${item.name} (${item.category}) - ${item.price}%0A`;
+    });
+    message += `%0ATotal: R$ ${calculateTotal(cartItems)}`;
+    return message;
+  };
+
+  // Função para confirmar pedido e redirecionar para WhatsApp
+  const handleConfirmOrder = () => {
+    const phone = '5583996985997'; // Substitua pelo número da cozinha (com DDI e DDD, sem +)
+    const message = buildOrderMessage();
+    const url = `https://wa.me/${phone}?text=${message}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -98,138 +112,41 @@ function App() {
           🛒 Carrinho ({cartItems.length === 0 ? '0' : cartItems.reduce((acc, item) => acc + item.quantity, 0)})
         </button>
       </header>
-      
-      {isCartOpen && (
-        <div className="cart-container">
-          <div className="cart-header">
-            <h2>Seu Pedido</h2>
-            <button className="close-button" onClick={() => setIsCartOpen(false)}>×</button>
-          </div>
-          
-          {cartItems.length === 0 ? (
-            <p className="empty-cart">Seu carrinho está vazio</p>
-          ) : (
-            <>
-              <div className="cart-items">
-                {cartItems.map((item) => (
-                  <div className="cart-item" key={`${item.category}-${item.id}`}>
-                    <div className="cart-item-info">
-                      <h4>{item.name}</h4>
-                      <p className="item-price">{item.price}</p>
-                    </div>
-                    <div className="quantity-controls">
-                      <button onClick={() => adjustQuantity(item.id, item.category, -1)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => adjustQuantity(item.id, item.category, 1)}>+</button>
-                      <button 
-                        className="remove-button"
-                        onClick={() => removeFromCart(item.id, item.category)}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="cart-footer">
-                <div className="total">
-                  <span>Total:</span>
-                  <span className="total-price">R$ {calculateTotal()}</span>
-                </div>
-                <div className="cart-actions">
-                  <button className="clear-cart" onClick={clearCart}>Limpar Pedido</button>
-                  <button className="confirm-order">Confirmar Pedido</button>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      
+      <Cart 
+        cartItems={cartItems}
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onAdjustQuantity={adjustQuantity}
+        onRemove={removeFromCart}
+        onClear={clearCart}
+        onConfirm={handleConfirmOrder}
+        calculateTotal={() => calculateTotal(cartItems)}
+      />
       <main className="menu-container">
-        <section className="menu-section">
-          <h2>Entradas</h2>
-          <div className="menu-items">
-            {menuItems.entradas.map(item => (
-              <div className="menu-item" key={item.id}>
-                <div className="menu-item-header">
-                  <h3>{item.name}</h3>
-                  <span className="price">{item.price}</span>
-                </div>
-                <p className="description">{item.description}</p>
-                <button 
-                  className="add-to-cart-button"
-                  onClick={() => addToCart(item, 'entradas')}
-                >
-                  Adicionar ao Pedido
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="menu-section">
-          <h2>Pratos Principais</h2>
-          <div className="menu-items">
-            {menuItems.pratosPrincipais.map(item => (
-              <div className="menu-item" key={item.id}>
-                <div className="menu-item-header">
-                  <h3>{item.name}</h3>
-                  <span className="price">{item.price}</span>
-                </div>
-                <p className="description">{item.description}</p>
-                <button 
-                  className="add-to-cart-button"
-                  onClick={() => addToCart(item, 'pratosPrincipais')}
-                >
-                  Adicionar ao Pedido
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="menu-section">
-          <h2>Sobremesas</h2>
-          <div className="menu-items">
-            {menuItems.sobremesas.map(item => (
-              <div className="menu-item" key={item.id}>
-                <div className="menu-item-header">
-                  <h3>{item.name}</h3>
-                  <span className="price">{item.price}</span>
-                </div>
-                <p className="description">{item.description}</p>
-                <button 
-                  className="add-to-cart-button"
-                  onClick={() => addToCart(item, 'sobremesas')}
-                >
-                  Adicionar ao Pedido
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="menu-section">
-          <h2>Bebidas</h2>
-          <div className="menu-items">
-            {menuItems.bebidas.map(item => (
-              <div className="menu-item" key={item.id}>
-                <div className="menu-item-header">
-                  <h3>{item.name}</h3>
-                  <span className="price">{item.price}</span>
-                </div>
-                <p className="description">{item.description}</p>
-                <button 
-                  className="add-to-cart-button"
-                  onClick={() => addToCart(item, 'bebidas')}
-                >
-                  Adicionar ao Pedido
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+        <MenuSection 
+          title="Entradas" 
+          items={menuItems.entradas} 
+          onAddToCart={addToCart} 
+          category="entradas" 
+        />
+        <MenuSection 
+          title="Pratos Principais" 
+          items={menuItems.pratosPrincipais} 
+          onAddToCart={addToCart} 
+          category="pratosPrincipais" 
+        />
+        <MenuSection 
+          title="Sobremesas" 
+          items={menuItems.sobremesas} 
+          onAddToCart={addToCart} 
+          category="sobremesas" 
+        />
+        <MenuSection 
+          title="Bebidas" 
+          items={menuItems.bebidas} 
+          onAddToCart={addToCart} 
+          category="bebidas" 
+        />
       </main>
     </div>
   )
