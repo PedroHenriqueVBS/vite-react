@@ -14,6 +14,9 @@ function App() {
   const [menu, setMenu] = useState(null);
   // Estado para identificar a mesa
   const [selectedTable, setSelectedTable] = useState('');
+  // Estado para o garçom ativo e número da cozinha
+  const [garcom, setGarcom] = useState('Clayton');
+  const [numeroCozinha, setNumeroCozinha] = useState('1');
 
   // Carrega o menu do backend ao iniciar
   useEffect(() => {
@@ -21,6 +24,13 @@ function App() {
       .then(res => res.json())
       .then(data => setMenu(data));
   }, []);
+
+  // Atualiza o número da cozinha baseado no garçom
+  useEffect(() => {
+    if (garcom === 'Clayton') setNumeroCozinha('1');
+    else if (garcom === 'Thiago') setNumeroCozinha('2');
+    else if (garcom === 'Maciel') setNumeroCozinha('3');
+  }, [garcom]);
 
   // Atualiza o menu no backend sempre que mudar
   const updateMenuOnServer = (newMenu) => {
@@ -91,7 +101,13 @@ function App() {
 
   // Função para confirmar pedido e redirecionar para WhatsApp
   const handleConfirmOrder = () => {
-    const phone = '5583996985997'; // Substitua pelo número da cozinha (com DDI e DDD, sem +)
+    // Telefones dos garçons
+    const telefones = {
+      Clayton: '5583996985997',
+      Thiago: '5583996985998',
+      Maciel: '5583996985999'
+    };
+    const phone = telefones[garcom] || '5583996985997';
     const message = buildOrderMessage();
     const url = `https://wa.me/${phone}?text=${message}`;
     window.open(url, '_blank');
@@ -180,7 +196,17 @@ function App() {
             </main>
           </div>
         } />
-        <Route path="/admin" element={menu ? <AdminMenu menu={menu} addMenuItem={addMenuItem} removeMenuItem={removeMenuItem} /> : null} />
+        <Route path="/admin" element={menu ? (
+          <AdminMenu 
+            menu={menu} 
+            addMenuItem={addMenuItem} 
+            removeMenuItem={removeMenuItem}
+            garcom={garcom}
+            setGarcom={setGarcom}
+            numeroCozinha={numeroCozinha}
+            setNumeroCozinha={setNumeroCozinha}
+          />
+        ) : null} />
       </Routes>
     </Router>
   );

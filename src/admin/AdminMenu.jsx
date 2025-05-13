@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-function AdminMenu({ menu, addMenuItem, removeMenuItem }) {
+function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numeroCozinha, setNumeroCozinha }) {
   const [category, setCategory] = useState('entradas');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +21,18 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem }) {
   return (
     <div className="admin-panel">
       <h2>Administração do Cardápio</h2>
+      <div className="admin-form-row">
+        <label>Garçom:
+          <select value={garcom} onChange={e => setGarcom(e.target.value)}>
+            <option value="Clayton">Clayton</option>
+            <option value="Thiago">Thiago</option>
+            <option value="Maciel">Maciel</option>
+          </select>
+        </label>
+        <label>Número da Cozinha:
+          <input value={numeroCozinha} onChange={e => setNumeroCozinha(e.target.value)} style={{width: 40}} />
+        </label>
+      </div>
       <form className="admin-form" onSubmit={handleAdd}>
         <div className="admin-form-row">
           <label>Categoria:
