@@ -3,6 +3,77 @@ import './App.css';
 import MenuSection from './components/MenuSection';
 import Cart from './components/Cart';
 import { calculateTotal } from './utils/cartUtils';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
+function AdminMenu({ menu, addMenuItem, removeMenuItem }) {
+  const [category, setCategory] = useState('entradas');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    if (!name || !description || !price) return;
+    // Garante que o valor já seja inserido como BRL
+    let formattedPrice = price.trim();
+    if (!/^R\$/.test(formattedPrice)) {
+      formattedPrice = 'R$ ' + formattedPrice;
+    }
+    addMenuItem(category, { name, description, price: formattedPrice });
+    setName(''); setDescription(''); setPrice('');
+  };
+
+  return (
+    <div className="admin-panel">
+      <h2>Administração do Cardápio</h2>
+      <form className="admin-form" onSubmit={handleAdd}>
+        <div className="admin-form-row">
+          <label>Categoria:
+            <select value={category} onChange={e => setCategory(e.target.value)}>
+              <option value="entradas">Entradas</option>
+              <option value="pratosPrincipais">Pratos Principais</option>
+              <option value="sobremesas">Sobremesas</option>
+              <option value="bebidas">Bebidas</option>
+            </select>
+          </label>
+          <label>Nome:
+            <input value={name} onChange={e => setName(e.target.value)} required />
+          </label>
+        </div>
+        <div className="admin-form-row">
+          <label>Descrição:
+            <input value={description} onChange={e => setDescription(e.target.value)} required />
+          </label>
+          <label>Preço:
+            <input value={price} onChange={e => setPrice(e.target.value)} required placeholder="R$ 00,00" />
+          </label>
+        </div>
+        <button type="submit" className="admin-add-btn">Adicionar Item</button>
+      </form>
+      <h3>Itens do Cardápio</h3>
+      <div className="admin-menu-list">
+        {Object.entries(menu).map(([cat, items]) => (
+          <div key={cat} className="admin-menu-category">
+            <div className="admin-category-title">{cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
+            <ul>
+              {items.map(item => (
+                <li key={item.id} className="admin-menu-item">
+                  <div>
+                    <span className="admin-item-name">{item.name}</span>
+                    <span className="admin-item-price">{item.price}</span>
+                  </div>
+                  <div className="admin-item-desc">{item.description}</div>
+                  <button onClick={() => removeMenuItem(cat, item.id)} className="admin-remove-btn">Remover</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <Link to="/" className="admin-back-link">Voltar para o site</Link>
+    </div>
+  );
+}
 
 function App() {
   const menuItems = {
@@ -33,6 +104,8 @@ function App() {
   // Estado para gerenciar os itens no carrinho
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  // Estado para gerenciar os itens do menu (dinâmico)
+  const [menu, setMenu] = useState(menuItems);
 
   // Função para adicionar item ao carrinho
   const addToCart = (item, category) => {
@@ -100,56 +173,83 @@ function App() {
     window.open(url, '_blank');
   };
 
+  // Rota para adicionar item ao menu
+  const addMenuItem = (category, newItem) => {
+    setMenu(prev => ({
+      ...prev,
+      [category]: [...prev[category], { ...newItem, id: Date.now() }]
+    }));
+  };
+
+  // Rota para remover item do menu
+  const removeMenuItem = (category, id) => {
+    setMenu(prev => ({
+      ...prev,
+      [category]: prev[category].filter(item => item.id !== id)
+    }));
+  };
+
   return (
-    <div className="App">
-      <header className="restaurant-header">
-        <h1>Restaurante Sabor & Arte</h1>
-        <p>Gastronomia de qualidade desde 1998</p>
-        <button 
-          className="cart-button"
-          onClick={() => setIsCartOpen(!isCartOpen)}
-        >
-          🛒 Carrinho ({cartItems.length === 0 ? '0' : cartItems.reduce((acc, item) => acc + item.quantity, 0)})
-        </button>
-      </header>
-      <Cart 
-        cartItems={cartItems}
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        onAdjustQuantity={adjustQuantity}
-        onRemove={removeFromCart}
-        onClear={clearCart}
-        onConfirm={handleConfirmOrder}
-        calculateTotal={() => calculateTotal(cartItems)}
-      />
-      <main className="menu-container">
-        <MenuSection 
-          title="Entradas" 
-          items={menuItems.entradas} 
-          onAddToCart={addToCart} 
-          category="entradas" 
-        />
-        <MenuSection 
-          title="Pratos Principais" 
-          items={menuItems.pratosPrincipais} 
-          onAddToCart={addToCart} 
-          category="pratosPrincipais" 
-        />
-        <MenuSection 
-          title="Sobremesas" 
-          items={menuItems.sobremesas} 
-          onAddToCart={addToCart} 
-          category="sobremesas" 
-        />
-        <MenuSection 
-          title="Bebidas" 
-          items={menuItems.bebidas} 
-          onAddToCart={addToCart} 
-          category="bebidas" 
-        />
-      </main>
-    </div>
-  )
+    <Router>
+      <nav style={{ background: 'var(--pastel-blue)', padding: 8, textAlign: 'center' }}>
+        <Link to="/" style={{ marginRight: 16, color: 'var(--pastel-dark-blue)', fontWeight: 600 }}>Cardápio</Link>
+        {/* <Link to="/admin" style={{ color: 'var(--pastel-dark-blue)', fontWeight: 600 }}>Admin</Link> */}
+      </nav>
+      <Routes>
+        <Route path="/" element={
+          <div className="App">
+            <header className="restaurant-header">
+              <h1>Boteco Bate Papo</h1>
+              <p>Gastronomia de qualidade desde 1998</p>
+              <button 
+                className="cart-button"
+                onClick={() => setIsCartOpen(!isCartOpen)}
+              >
+                🛒 Carrinho ({cartItems.length === 0 ? '0' : cartItems.reduce((acc, item) => acc + item.quantity, 0)})
+              </button>
+            </header>
+            <Cart 
+              cartItems={cartItems}
+              isOpen={isCartOpen}
+              onClose={() => setIsCartOpen(false)}
+              onAdjustQuantity={adjustQuantity}
+              onRemove={removeFromCart}
+              onClear={clearCart}
+              onConfirm={handleConfirmOrder}
+              calculateTotal={() => calculateTotal(cartItems)}
+            />
+            <main className="menu-container">
+              <MenuSection 
+                title="Entradas" 
+                items={menu.entradas} 
+                onAddToCart={addToCart} 
+                category="entradas" 
+              />
+              <MenuSection 
+                title="Pratos Principais" 
+                items={menu.pratosPrincipais} 
+                onAddToCart={addToCart} 
+                category="pratosPrincipais" 
+              />
+              <MenuSection 
+                title="Sobremesas" 
+                items={menu.sobremesas} 
+                onAddToCart={addToCart} 
+                category="sobremesas" 
+              />
+              <MenuSection 
+                title="Bebidas" 
+                items={menu.bebidas} 
+                onAddToCart={addToCart} 
+                category="bebidas" 
+              />
+            </main>
+          </div>
+        } />
+        <Route path="/admin" element={<AdminMenu menu={menu} addMenuItem={addMenuItem} removeMenuItem={removeMenuItem} />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
