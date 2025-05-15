@@ -33,6 +33,8 @@ function App() {
   const [selectedTable, setSelectedTable] = useState('');
   // Estado para o garçom ativo
   const [garcom, setGarcom] = useState('Clayton');
+  // Estado para o número da cozinha (telefone)
+  const [numeroCozinha, setNumeroCozinha] = useState('');
   // Estado para o modo offline
   const [isOffline, setIsOffline] = useState(false);
   // Estado para indicar carregamento
