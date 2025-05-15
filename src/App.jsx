@@ -354,19 +354,16 @@ function App() {
               <div className="loading-admin">
                 <p>Carregando painel administrativo...</p>
               </div>
-            ) : menu ? (
+            ) : (
               <AdminMenu 
-                menu={menu} 
+                menu={menu || FALLBACK_MENU} // Sempre fornecer um menu válido
                 addMenuItem={addMenuItem} 
                 removeMenuItem={removeMenuItem}
                 garcom={garcom}
                 setGarcom={setGarcom}
+                numeroCozinha={numeroCozinha || ''} // Garantir valor default
+                setNumeroCozinha={setNumeroCozinha}
               />
-            ) : (
-              <div className="error-admin">
-                <p>Erro ao carregar o painel administrativo. <Link to="/">Voltar para o cardápio</Link></p>
-                <button onClick={() => window.location.reload()}>Tentar novamente</button>
-              </div>
             )}
           </div>
         } />

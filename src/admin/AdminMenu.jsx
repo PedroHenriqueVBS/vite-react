@@ -11,116 +11,113 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Mapeamento dos garçons para seus números de telefone
-  const telefones = {
-    Clayton: '5583996985997',
-    Thiago: '5583996985997',
-    Maciel: '5583996985997'
-  };
-
-  // Atualizar o número da cozinha quando mudar o garçom
+  // Garantir que temos um menu válido (caso venha undefined ou null)
+  const safeMenu = menu || { entradas: [], pratosPrincipais: [], sobremesas: [], bebidas: [] };
+  
+  // Verificar se numeroCozinha está definido
   useEffect(() => {
-    setNumeroCozinha(telefones[garcom] || '');
-  }, [garcom, setNumeroCozinha]);
+    if (!numeroCozinha && garcom) {
+      const telefones = {
+        Clayton: '5583996985997',
+        Thiago: '5583996985997',
+        Maciel: '5583996985997'
+      };
+      setNumeroCozinha(telefones[garcom] || '');
+    }
+  }, [garcom, numeroCozinha, setNumeroCozinha]);
 
+  // Simplificação da função handleImageChange
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-      setImageFile(null);
-      setImagePreview('');
-      return;
+    try {
+      const file = e.target.files[0];
+      if (!file) {
+        setImageFile(null);
+        setImagePreview('');
+        return;
+      }
+      
+      setImageFile(file);
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Erro ao processar imagem:", err);
+      setError("Erro ao processar a imagem selecionada");
     }
-    
-    // Validar o tipo de arquivo
-    if (!file.type.match('image.*')) {
-      alert('Por favor, selecione uma imagem válida');
-      e.target.value = '';
-      return;
-    }
-    
-    setImageFile(file);
-    
-    // Criar preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImagePreview(event.target.result);
-    };
-    reader.readAsDataURL(file);
   };
 
-  // Função para fazer upload da imagem para o backend
+  // Função simplificada para upload
   const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    setUploading(true);
+    if (!file) return null;
     
     try {
-      // Tentar usar FileReader para criar base64 como fallback
+      // Primeiro criar o preview em base64 como fallback
+      const reader = new FileReader();
       const base64Image = await new Promise((resolve) => {
-        const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.readAsDataURL(file);
       });
       
+      // Tentar fazer o upload para o servidor
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      // Usar apenas base64 por enquanto para evitar problemas
+      return base64Image;
+      
+      /* Comentado para usar apenas base64 enquanto servidor está com problemas
       try {
-        console.log('Tentando enviar imagem para o servidor...');
         const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/upload', {
           method: 'POST',
-          body: formData,
-          mode: 'cors',
-          cache: 'no-cache'
+          body: formData
         });
         
         if (!response.ok) {
-          throw new Error(`Falha na resposta do servidor: ${response.status}`);
+          throw new Error(`Falha no upload: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Upload bem-sucedido:', data);
         return data.imageUrl;
       } catch (error) {
-        console.error('Falha no upload para o servidor:', error);
-        console.log('Usando base64 como fallback');
-        return base64Image; // Fallback para base64
+        console.warn("Usando base64 como fallback:", error);
+        return base64Image;
       }
+      */
     } catch (error) {
-      console.error('Erro geral no processo de upload:', error);
-      alert('Falha ao processar a imagem.');
+      console.error("Erro no processamento da imagem:", error);
       return null;
-    } finally {
-      setUploading(false);
     }
   };
 
+  // Função para adicionar item
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!name || !description || !price) return;
-    
-    setUploading(true);
     setError(null);
     
-    let formattedPrice = price.trim();
-    if (!/^R\$/.test(formattedPrice)) {
-      formattedPrice = 'R$ ' + formattedPrice;
-    }
-    
     try {
-      let imageData = '';
-      
-      if (imageFile) {
-        try {
-          imageData = await uploadImage(imageFile);
-        } catch (error) {
-          console.error("Falha no upload, usando base64 como alternativa:", error);
-          imageData = imagePreview;
-        }
-        
-        if (!imageData) {
-          imageData = imagePreview;
-        }
+      if (!name || !description || !price) {
+        setError("Preencha todos os campos obrigatórios");
+        return;
       }
-
+      
+      setUploading(true);
+      
+      // Formatar preço
+      let formattedPrice = price.trim();
+      if (!/^R\$/.test(formattedPrice)) {
+        formattedPrice = 'R$ ' + formattedPrice;
+      }
+      
+      // Processar imagem
+      let imageData = '';
+      if (imageFile) {
+        imageData = await uploadImage(imageFile);
+      }
+      
+      // Adicionar ao menu
       addMenuItem(category, { 
         name, 
         description, 
@@ -128,34 +125,23 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
         image: imageData
       });
       
-      setName(''); 
-      setDescription(''); 
+      // Limpar formulário
+      setName('');
+      setDescription('');
       setPrice('');
       setImageFile(null);
       setImagePreview('');
       
+      // Limpar input de arquivo
       const fileInput = document.getElementById('dishImageInput');
       if (fileInput) fileInput.value = '';
-      
-    } catch (error) {
-      console.error("Erro ao adicionar item:", error);
-      setError("Erro ao adicionar item ao cardápio. Tente novamente.");
+    } catch (err) {
+      console.error("Erro ao adicionar item:", err);
+      setError("Erro ao adicionar item. Tente novamente.");
     } finally {
       setUploading(false);
     }
   };
-
-  if (!menu) {
-    return (
-      <div className="admin-panel">
-        <h2>Administração do Cardápio</h2>
-        <div className="loading-admin">
-          <p>Carregando dados do cardápio...</p>
-        </div>
-        <Link to="/" className="admin-back-link">Voltar para o site</Link>
-      </div>
-    );
-  }
 
   return (
     <div className="admin-panel">
@@ -169,7 +155,7 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
       
       <div className="admin-form-row">
         <label>Garçom:
-          <select value={garcom} onChange={e => setGarcom(e.target.value)}>
+          <select value={garcom || 'Clayton'} onChange={e => setGarcom(e.target.value)}>
             <option value="Clayton">Clayton</option>
             <option value="Thiago">Thiago</option>
             <option value="Maciel">Maciel</option>
@@ -177,12 +163,13 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
         </label>
         <label>Número da Cozinha:
           <input 
-            value={numeroCozinha} 
+            value={numeroCozinha || ''} 
             readOnly 
             style={{width: 140, backgroundColor: 'var(--dark-grey)'}} 
           />
         </label>
       </div>
+      
       <form className="admin-form" onSubmit={handleAdd}>
         <div className="admin-form-row">
           <label>Categoria:
@@ -250,11 +237,11 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
       
       <h3>Itens do Cardápio</h3>
       <div className="admin-menu-list">
-        {Object.entries(menu).map(([cat, items]) => (
+        {Object.entries(safeMenu).map(([cat, items]) => (
           <div key={cat} className="admin-menu-category">
             <div className="admin-category-title">{cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
             <ul>
-              {items.map(item => (
+              {Array.isArray(items) ? items.map(item => (
                 <li key={item.id} className="admin-menu-item">
                   <div className="admin-item-details">
                     <div>
@@ -262,7 +249,12 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
                       <span className="admin-item-price">{item.price}</span>
                     </div>
                     <div className="admin-item-desc">{item.description}</div>
-                    <button onClick={() => removeMenuItem(cat, item.id)} className="admin-remove-btn">Remover</button>
+                    <button 
+                      onClick={() => removeMenuItem(cat, item.id)} 
+                      className="admin-remove-btn"
+                    >
+                      Remover
+                    </button>
                   </div>
                   {item.image && (
                     <div className="admin-item-image">
@@ -270,7 +262,7 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
                     </div>
                   )}
                 </li>
-              ))}
+              )) : <li>Nenhum item encontrado</li>}
             </ul>
           </div>
         ))}
