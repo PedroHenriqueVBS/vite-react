@@ -30,6 +30,18 @@ function App() {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newMenu)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Falha ao atualizar o menu');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Menu atualizado com sucesso');
+    })
+    .catch(error => {
+      console.error('Erro ao atualizar menu:', error);
     });
   };
 

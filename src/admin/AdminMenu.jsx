@@ -6,16 +6,107 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploading, setUploading] = useState(false);
 
-  const handleAdd = (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setImageFile(null);
+      setImagePreview('');
+      return;
+    }
+    
+    // Validar o tipo de arquivo
+    if (!file.type.match('image.*')) {
+      alert('Por favor, selecione uma imagem válida');
+      e.target.value = '';
+      return;
+    }
+    
+    setImageFile(file);
+    
+    // Criar preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Função para fazer upload da imagem para o backend
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    setUploading(true);
+    
+    try {
+      const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error('Falha ao enviar imagem');
+      }
+      
+      const data = await response.json();
+      return data.imageUrl;
+    } catch (error) {
+      console.error('Erro ao enviar imagem:', error);
+      alert('Falha ao enviar imagem. Tente novamente.');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAdd = async (e) => {
     e.preventDefault();
     if (!name || !description || !price) return;
+    
+    // Desabilitar botão durante o upload
+    setUploading(true);
+    
     let formattedPrice = price.trim();
     if (!/^R\$/.test(formattedPrice)) {
       formattedPrice = 'R$ ' + formattedPrice;
     }
-    addMenuItem(category, { name, description, price: formattedPrice });
-    setName(''); setDescription(''); setPrice('');
+    
+    try {
+      let imageUrl = '';
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+        if (!imageUrl) {
+          setUploading(false);
+          return; // Interrompe se o upload falhar
+        }
+      }
+
+      // Adicionar item com a URL da imagem
+      addMenuItem(category, { 
+        name, 
+        description, 
+        price: formattedPrice,
+        image: imageUrl // URL da imagem no servidor
+      });
+      
+      // Limpar campos
+      setName(''); 
+      setDescription(''); 
+      setPrice('');
+      setImageFile(null);
+      setImagePreview('');
+      
+      // Limpar input de arquivo
+      const fileInput = document.getElementById('dishImageInput');
+      if (fileInput) fileInput.value = '';
+      
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -55,8 +146,49 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
             <input value={price} onChange={e => setPrice(e.target.value)} required placeholder="R$ 00,00" />
           </label>
         </div>
-        <button type="submit" className="admin-add-btn">Adicionar Item</button>
+        <div className="admin-form-row">
+          <label className="admin-image-upload">
+            Imagem do Prato:
+            <input 
+              type="file" 
+              id="dishImageInput"
+              accept="image/*" 
+              onChange={handleImageChange} 
+              className="admin-image-input"
+              disabled={uploading}
+            />
+            <span className="admin-image-note">Imagens menores que 5MB recomendadas</span>
+          </label>
+        </div>
+        
+        {imagePreview && (
+          <div className="admin-image-preview">
+            <img src={imagePreview} alt="Preview" />
+            <button 
+              type="button" 
+              className="admin-clear-image" 
+              onClick={() => {
+                setImageFile(null);
+                setImagePreview('');
+                const fileInput = document.getElementById('dishImageInput');
+                if (fileInput) fileInput.value = '';
+              }}
+              disabled={uploading}
+            >
+              Remover Imagem
+            </button>
+          </div>
+        )}
+        
+        <button 
+          type="submit" 
+          className="admin-add-btn" 
+          disabled={uploading}
+        >
+          {uploading ? 'Enviando...' : 'Adicionar Item'}
+        </button>
       </form>
+      
       <h3>Itens do Cardápio</h3>
       <div className="admin-menu-list">
         {Object.entries(menu).map(([cat, items]) => (
@@ -65,12 +197,19 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
             <ul>
               {items.map(item => (
                 <li key={item.id} className="admin-menu-item">
-                  <div>
-                    <span className="admin-item-name">{item.name}</span>
-                    <span className="admin-item-price">{item.price}</span>
+                  <div className="admin-item-details">
+                    <div>
+                      <span className="admin-item-name">{item.name}</span>
+                      <span className="admin-item-price">{item.price}</span>
+                    </div>
+                    <div className="admin-item-desc">{item.description}</div>
+                    <button onClick={() => removeMenuItem(cat, item.id)} className="admin-remove-btn">Remover</button>
                   </div>
-                  <div className="admin-item-desc">{item.description}</div>
-                  <button onClick={() => removeMenuItem(cat, item.id)} className="admin-remove-btn">Remover</button>
+                  {item.image && (
+                    <div className="admin-item-image">
+                      <img src={item.image} alt={item.name} />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
