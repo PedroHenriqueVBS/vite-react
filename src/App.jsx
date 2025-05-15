@@ -44,63 +44,51 @@ function App() {
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingMenu(true);
+      
       try {
-        console.log('Tentando carregar menu do backend...');
+        console.log('Carregando menu do backend...');
         
-        // Usando uma função de timeout para evitar esperas muito longas
-        const fetchWithTimeout = async (url, options, timeout = 8000) => {
-          const controller = new AbortController();
-          const id = setTimeout(() => controller.abort(), timeout);
-          
-          const response = await fetch(url, {
-            ...options,
-            signal: controller.signal
-          });
-          clearTimeout(id);
-          return response;
-        };
+        // Usar Promise.race para implementar um timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
         
-        const res = await fetchWithTimeout('https://menu-backend-production-350b.up.railway.app/api/menu', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          },
-          mode: 'cors'
+        const fetchPromise = fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          signal: controller.signal
         });
         
-        if (!res.ok) {
-          throw new Error(`Erro na resposta: ${res.status}`);
+        const response = await fetchPromise;
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`Erro ao carregar menu: ${response.status}`);
         }
         
-        const data = await res.json();
-        console.log('Menu carregado com sucesso do backend');
+        const data = await response.json();
+        console.log('Menu carregado com sucesso');
         setMenu(data);
         setIsOffline(false);
         
         // Salvar no localStorage para uso offline
-        try {
-          localStorage.setItem('offlineMenu', JSON.stringify(data));
-        } catch (e) {
-          console.error('Erro ao salvar menu localmente:', e);
-        }
+        localStorage.setItem('offlineMenu', JSON.stringify(data));
       } catch (error) {
-        console.error('Erro ao carregar menu do backend:', error);
+        console.error('Erro ao carregar menu:', error);
         
-        // Verificar se temos menu salvo localmente
-        try {
-          const savedMenu = localStorage.getItem('offlineMenu');
-          if (savedMenu) {
-            const parsedMenu = JSON.parse(savedMenu);
-            setMenu(parsedMenu);
-            console.log('Menu carregado do armazenamento local');
-          } else {
-            // Usar menu de fallback como objeto estático, não como função
+        // Tentar carregar do localStorage
+        const savedMenu = localStorage.getItem('offlineMenu');
+        if (savedMenu) {
+          try {
+            setMenu(JSON.parse(savedMenu));
+            console.log('Usando menu do armazenamento local');
+          } catch (e) {
+            // Se falhar, usar menu de fallback
             setMenu(FALLBACK_MENU);
             console.log('Usando menu de fallback');
           }
-        } catch (e) {
-          console.error('Erro ao usar menu local/fallback:', e);
+        } else {
           setMenu(FALLBACK_MENU);
+          console.log('Usando menu de fallback (sem localStorage)');
         }
         
         setIsOffline(true);
