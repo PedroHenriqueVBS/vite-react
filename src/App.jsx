@@ -43,24 +43,66 @@ function App() {
     const fetchMenu = async () => {
       setLoadingMenu(true);
       
+      // Implementar retry com backoff exponencial
+      const fetchWithRetry = async (url, options, maxRetries = 3) => {
+        let retries = 0;
+        
+        while (retries < maxRetries) {
+          try {
+            const response = await fetch(url, options);
+            
+            if (response.ok) {
+              return response;
+            } else if (response.status === 502) {
+              // Bad Gateway - esperar e tentar novamente
+              console.log(`Tentativa ${retries + 1} falhou com erro 502. Tentando novamente...`);
+            } else {
+              // Outros erros - lançar exceção
+              throw new Error(`Erro HTTP: ${response.status}`);
+            }
+          } catch (error) {
+            console.error(`Erro na tentativa ${retries + 1}:`, error);
+            
+            if (retries === maxRetries - 1) {
+              throw error; // Re-lançar na última tentativa
+            }
+          }
+          
+          // Esperar antes de tentar novamente (backoff exponencial)
+          const delay = Math.pow(2, retries) * 1000;
+          console.log(`Aguardando ${delay}ms antes da próxima tentativa...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          retries++;
+        }
+      };
+      
       try {
         console.log('Carregando menu do backend...');
         
-        const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
-          headers: { 'Accept': 'application/json' },
-          mode: 'cors'
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Erro ao carregar menu: ${response.status}`);
+        // Tentar primeiro o endpoint de health para verificar se o servidor está online
+        try {
+          await fetch('https://menu-backend-production-350b.up.railway.app/health');
+          console.log('Servidor respondendo ao healthcheck');
+        } catch (healthError) {
+          console.warn('Servidor não está respondendo ao healthcheck:', healthError);
         }
+        
+        // Tentar carregar o menu com retry
+        const response = await fetchWithRetry(
+          'https://menu-backend-production-350b.up.railway.app/api/menu',
+          {
+            headers: { 'Accept': 'application/json' },
+            mode: 'cors'
+          }
+        );
         
         const data = await response.json();
         console.log('Menu carregado com sucesso');
         setMenu(data);
         setIsOffline(false);
       } catch (error) {
-        console.error('Erro ao carregar menu:', error);
+        console.error('Erro ao carregar menu após tentativas:', error);
         setMenu(FALLBACK_MENU);
         console.log('Usando menu de fallback');
         setIsOffline(true);
