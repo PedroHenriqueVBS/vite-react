@@ -55,25 +55,37 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     setUploading(true);
     
     try {
-      const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/upload', {
-        method: 'POST',
-        body: formData,
-        // Adicionar estas opções para credenciais e origem
-        credentials: 'include',
-        mode: 'cors'
+      // Tentar usar FileReader para criar base64 como fallback
+      const base64Image = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
       });
       
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Resposta do servidor:', errorData);
-        throw new Error(`Falha ao enviar imagem: ${response.status} ${response.statusText}`);
+      try {
+        console.log('Tentando enviar imagem para o servidor...');
+        const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/upload', {
+          method: 'POST',
+          body: formData,
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Falha na resposta do servidor: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Upload bem-sucedido:', data);
+        return data.imageUrl;
+      } catch (error) {
+        console.error('Falha no upload para o servidor:', error);
+        console.log('Usando base64 como fallback');
+        return base64Image; // Fallback para base64
       }
-      
-      const data = await response.json();
-      return data.imageUrl;
     } catch (error) {
-      console.error('Erro ao enviar imagem:', error);
-      alert(`Falha ao enviar imagem: ${error.message || 'Erro de CORS ou conexão'}`);
+      console.error('Erro geral no processo de upload:', error);
+      alert('Falha ao processar a imagem.');
       return null;
     } finally {
       setUploading(false);
