@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numeroCozinha, setNumeroCozinha }) {
@@ -9,6 +9,18 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [uploading, setUploading] = useState(false);
+
+  // Mapeamento dos garçons para seus números de telefone
+  const telefones = {
+    Clayton: '5583996985997',
+    Thiago: '5583996985997',
+    Maciel: '5583996985997'
+  };
+
+  // Atualizar o número da cozinha quando mudar o garçom
+  useEffect(() => {
+    setNumeroCozinha(telefones[garcom] || '');
+  }, [garcom, setNumeroCozinha]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -121,7 +133,11 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
           </select>
         </label>
         <label>Número da Cozinha:
-          <input value={numeroCozinha} onChange={e => setNumeroCozinha(e.target.value)} style={{width: 40}} />
+          <input 
+            value={numeroCozinha} 
+            readOnly 
+            style={{width: 140, backgroundColor: 'var(--dark-grey)'}} 
+          />
         </label>
       </div>
       <form className="admin-form" onSubmit={handleAdd}>
