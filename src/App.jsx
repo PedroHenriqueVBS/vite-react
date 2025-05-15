@@ -35,8 +35,6 @@ function App() {
   const [garcom, setGarcom] = useState('Clayton');
   // Estado para o modo offline
   const [isOffline, setIsOffline] = useState(false);
-  // Estado para o número da cozinha
-  const [numeroCozinha, setNumeroCozinha] = useState('');
   // Estado para indicar carregamento
   const [loadingMenu, setLoadingMenu] = useState(true);
   
@@ -48,18 +46,10 @@ function App() {
       try {
         console.log('Carregando menu do backend...');
         
-        // Usar Promise.race para implementar um timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
-        
-        const fetchPromise = fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
+        const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
           headers: { 'Accept': 'application/json' },
-          mode: 'cors',
-          signal: controller.signal
+          mode: 'cors'
         });
-        
-        const response = await fetchPromise;
-        clearTimeout(timeoutId);
         
         if (!response.ok) {
           throw new Error(`Erro ao carregar menu: ${response.status}`);
@@ -69,28 +59,10 @@ function App() {
         console.log('Menu carregado com sucesso');
         setMenu(data);
         setIsOffline(false);
-        
-        // Salvar no localStorage para uso offline
-        localStorage.setItem('offlineMenu', JSON.stringify(data));
       } catch (error) {
         console.error('Erro ao carregar menu:', error);
-        
-        // Tentar carregar do localStorage
-        const savedMenu = localStorage.getItem('offlineMenu');
-        if (savedMenu) {
-          try {
-            setMenu(JSON.parse(savedMenu));
-            console.log('Usando menu do armazenamento local');
-          } catch (e) {
-            // Se falhar, usar menu de fallback
-            setMenu(FALLBACK_MENU);
-            console.log('Usando menu de fallback');
-          }
-        } else {
-          setMenu(FALLBACK_MENU);
-          console.log('Usando menu de fallback (sem localStorage)');
-        }
-        
+        setMenu(FALLBACK_MENU);
+        console.log('Usando menu de fallback');
         setIsOffline(true);
       } finally {
         setLoadingMenu(false);
@@ -103,15 +75,7 @@ function App() {
   // Atualiza o menu no backend sempre que mudar
   const updateMenuOnServer = (newMenu) => {
     if (isOffline) {
-      console.log('Modo offline: alterações salvas apenas localmente');
-      
-      // Atualizar localStorage mesmo offline
-      try {
-        localStorage.setItem('offlineMenu', JSON.stringify(newMenu));
-      } catch (e) {
-        console.error('Erro ao salvar menu offline:', e);
-      }
-      
+      console.log('Modo offline: alterações não serão salvas no servidor');
       return;
     }
     
@@ -128,8 +92,6 @@ function App() {
     })
     .then(() => {
       console.log('Menu atualizado com sucesso no servidor');
-      // Atualizar localStorage após sucesso
-      localStorage.setItem('offlineMenu', JSON.stringify(newMenu));
     })
     .catch(error => {
       console.error('Erro ao atualizar menu no servidor:', error);
