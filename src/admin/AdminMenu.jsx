@@ -57,18 +57,23 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     try {
       const response = await fetch('https://menu-backend-production-350b.up.railway.app/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        // Adicionar estas opções para credenciais e origem
+        credentials: 'include',
+        mode: 'cors'
       });
       
       if (!response.ok) {
-        throw new Error('Falha ao enviar imagem');
+        const errorData = await response.text();
+        console.error('Resposta do servidor:', errorData);
+        throw new Error(`Falha ao enviar imagem: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
       return data.imageUrl;
     } catch (error) {
       console.error('Erro ao enviar imagem:', error);
-      alert('Falha ao enviar imagem. Tente novamente.');
+      alert(`Falha ao enviar imagem: ${error.message || 'Erro de CORS ou conexão'}`);
       return null;
     } finally {
       setUploading(false);
@@ -79,7 +84,6 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     e.preventDefault();
     if (!name || !description || !price) return;
     
-    // Desabilitar botão durante o upload
     setUploading(true);
     
     let formattedPrice = price.trim();
@@ -88,21 +92,29 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     }
     
     try {
-      let imageUrl = '';
+      let imageData = '';
+      
+      // Solução temporária: usar base64 se o upload falhar
       if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-        if (!imageUrl) {
-          setUploading(false);
-          return; // Interrompe se o upload falhar
+        try {
+          imageData = await uploadImage(imageFile);
+        } catch (error) {
+          console.error("Falha no upload, usando base64 como alternativa:", error);
+          imageData = imagePreview; // Usar o base64 do preview
+        }
+        
+        if (!imageData) {
+          // Se ainda falhar, usar o base64
+          imageData = imagePreview;
         }
       }
 
-      // Adicionar item com a URL da imagem
+      // Adicionar item com a URL ou base64 da imagem
       addMenuItem(category, { 
         name, 
         description, 
         price: formattedPrice,
-        image: imageUrl // URL da imagem no servidor
+        image: imageData
       });
       
       // Limpar campos
