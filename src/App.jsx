@@ -33,23 +33,39 @@ function App() {
   const [selectedTable, setSelectedTable] = useState('');
   // Estado para o garçom ativo
   const [garcom, setGarcom] = useState('Clayton');
+  // Estado para o modo offline
   const [isOffline, setIsOffline] = useState(false);
+  // Estado para o número da cozinha
+  const [numeroCozinha, setNumeroCozinha] = useState('');
+  // Estado para indicar carregamento
   const [loadingMenu, setLoadingMenu] = useState(true);
-
-  // Carrega o menu do backend ou usa o fallback
+  
+  // Carrega o menu do backend ao iniciar
   useEffect(() => {
     const fetchMenu = async () => {
       setLoadingMenu(true);
       try {
         console.log('Tentando carregar menu do backend...');
         
-        const res = await fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
+        // Usando uma função de timeout para evitar esperas muito longas
+        const fetchWithTimeout = async (url, options, timeout = 8000) => {
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), timeout);
+          
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+          });
+          clearTimeout(id);
+          return response;
+        };
+        
+        const res = await fetchWithTimeout('https://menu-backend-production-350b.up.railway.app/api/menu', {
           method: 'GET',
           headers: {
             'Accept': 'application/json'
           },
-          mode: 'cors',
-          cache: 'no-cache'
+          mode: 'cors'
         });
         
         if (!res.ok) {
@@ -60,24 +76,31 @@ function App() {
         console.log('Menu carregado com sucesso do backend');
         setMenu(data);
         setIsOffline(false);
+        
+        // Salvar no localStorage para uso offline
+        try {
+          localStorage.setItem('offlineMenu', JSON.stringify(data));
+        } catch (e) {
+          console.error('Erro ao salvar menu localmente:', e);
+        }
       } catch (error) {
         console.error('Erro ao carregar menu do backend:', error);
         
         // Verificar se temos menu salvo localmente
-        const savedMenu = localStorage.getItem('offlineMenu');
-        if (savedMenu) {
-          try {
+        try {
+          const savedMenu = localStorage.getItem('offlineMenu');
+          if (savedMenu) {
             const parsedMenu = JSON.parse(savedMenu);
             setMenu(parsedMenu);
             console.log('Menu carregado do armazenamento local');
-          } catch (e) {
-            console.error('Erro ao carregar menu local:', e);
+          } else {
+            // Usar menu de fallback como objeto estático, não como função
             setMenu(FALLBACK_MENU);
+            console.log('Usando menu de fallback');
           }
-        } else {
-          // Usar menu de fallback
+        } catch (e) {
+          console.error('Erro ao usar menu local/fallback:', e);
           setMenu(FALLBACK_MENU);
-          console.log('Usando menu de fallback');
         }
         
         setIsOffline(true);
@@ -89,26 +112,25 @@ function App() {
     fetchMenu();
   }, []);
   
-  // Salvar menu no localStorage quando atualizar
-  useEffect(() => {
-    if (menu && !isOffline) {
-      localStorage.setItem('offlineMenu', JSON.stringify(menu));
-      console.log('Menu salvo localmente para uso offline');
-    }
-  }, [menu, isOffline]);
-
   // Atualiza o menu no backend sempre que mudar
   const updateMenuOnServer = (newMenu) => {
     if (isOffline) {
       console.log('Modo offline: alterações salvas apenas localmente');
+      
+      // Atualizar localStorage mesmo offline
+      try {
+        localStorage.setItem('offlineMenu', JSON.stringify(newMenu));
+      } catch (e) {
+        console.error('Erro ao salvar menu offline:', e);
+      }
+      
       return;
     }
     
     fetch('https://menu-backend-production-350b.up.railway.app/api/menu', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newMenu),
-      mode: 'cors'
+      body: JSON.stringify(newMenu)
     })
     .then(response => {
       if (!response.ok) {
@@ -118,11 +140,13 @@ function App() {
     })
     .then(() => {
       console.log('Menu atualizado com sucesso no servidor');
+      // Atualizar localStorage após sucesso
+      localStorage.setItem('offlineMenu', JSON.stringify(newMenu));
     })
     .catch(error => {
       console.error('Erro ao atualizar menu no servidor:', error);
-      setIsOffline(true); // Mudar para modo offline se falhar
-      alert('Não foi possível conectar ao servidor. Mudando para modo offline.');
+      setIsOffline(true);
+      alert('Não foi possível conectar ao servidor. Modo offline ativado.');
     });
   };
 

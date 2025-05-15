@@ -1,0 +1,15 @@
+{
+  "entradas": [
+    { "id": 1, "name": "Bruschetta Tradicional", "description": "Pão italiano tostado com tomates, alho e manjericão", "price": "R$ 18,90" },
+    { "id": 2, "name": "Carpaccio", "description": "Finas fatias de carne com molho especial e parmesão", "price": "R$ 29,90" }
+  ],
+  "pratosPrincipais": [
+    { "id": 1, "name": "Filé Mignon ao Molho Madeira", "description": "Filé mignon grelhado com molho madeira", "price": "R$ 62,90" }
+  ],
+  "sobremesas": [
+    { "id": 1, "name": "Petit Gateau", "description": "Bolo quente de chocolate com sorvete", "price": "R$ 22,90" }
+  ],
+  "bebidas": [
+    { "id": 1, "name": "Água Mineral", "description": "Com ou sem gás (500ml)", "price": "R$ 6,90" }
+  ]
+}
