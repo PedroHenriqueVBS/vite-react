@@ -461,7 +461,7 @@ body, .App {
 }
 .admin-item-desc {
   font-size: 0.97rem;
-  color: var(--text-grey);
+  color: var (--text-grey);
   margin-bottom: 4px;
 }
 .admin-remove-btn {
@@ -726,4 +726,38 @@ body, .App {
   .menu-item-image img {
     height: 140px;
   }
+}
+
+/* Estilos para estado de carregamento */
+.loading-menu,
+.loading-admin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--accent-orange);
+  font-size: 1.2rem;
+  text-align: center;
+  background-color: var(--medium-grey);
+  border-radius: 8px;
+  margin: 20px 0;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Assegurar que o link Admin esteja visível */
+nav {
+  background-color: var(--dark-grey) !important;
+  padding: 12px !important;
+}
+
+nav a {
+  color: var(--accent-orange) !important;
+  margin-right: 20px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+nav a:hover {
+  text-decoration: underline;
 }
