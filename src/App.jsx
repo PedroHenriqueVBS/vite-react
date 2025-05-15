@@ -14,9 +14,8 @@ function App() {
   const [menu, setMenu] = useState(null);
   // Estado para identificar a mesa
   const [selectedTable, setSelectedTable] = useState('');
-  // Estado para o garçom ativo e número da cozinha
+  // Estado para o garçom ativo
   const [garcom, setGarcom] = useState('Clayton');
-  const [numeroCozinha, setNumeroCozinha] = useState('1');
 
   // Carrega o menu do backend ao iniciar
   useEffect(() => {
@@ -24,13 +23,6 @@ function App() {
       .then(res => res.json())
       .then(data => setMenu(data));
   }, []);
-
-  // Atualiza o número da cozinha baseado no garçom
-  useEffect(() => {
-    if (garcom === 'Clayton') setNumeroCozinha('1');
-    else if (garcom === 'Thiago') setNumeroCozinha('2');
-    else if (garcom === 'Maciel') setNumeroCozinha('3');
-  }, [garcom]);
 
   // Atualiza o menu no backend sempre que mudar
   const updateMenuOnServer = (newMenu) => {
@@ -203,8 +195,6 @@ function App() {
             removeMenuItem={removeMenuItem}
             garcom={garcom}
             setGarcom={setGarcom}
-            numeroCozinha={numeroCozinha}
-            setNumeroCozinha={setNumeroCozinha}
           />
         ) : null} />
       </Routes>

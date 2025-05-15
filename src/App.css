@@ -1,18 +1,20 @@
-/* Paleta pastel Brasil: verde, amarelo, azul, branco (tons suaves) */
+/* Paleta minimalista: laranja-amarelado e preto */
 :root {
-  --pastel-green: #b6e2b6;
-  --pastel-yellow: #fff9c4;
-  --pastel-blue: #b3d8f7;
-  --pastel-dark-blue: #7bb1e0;
-  --pastel-white: #f9f9f9;
-  --pastel-border: #e0e0e0;
-  --pastel-text: #2d3a2e;
-  --pastel-accent: #ffe082;
+  --accent-orange: #e69604;
+  --dark-bg: #090808;
+  --dark-grey: #1a1a1a;
+  --light-grey: #333333;
+  --medium-grey: #252525;
+  --text-white: #f8f8f8;
+  --text-light: #e0e0e0;
+  --text-grey: #9e9e9e;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --border-dark: #363636;
 }
 
 body, .App {
-  background: var(--pastel-white);
-  color: var(--pastel-text);
+  background: var(--dark-bg);
+  color: var(--text-white);
 }
 
 #root {
@@ -62,33 +64,32 @@ body, .App {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Georgia', serif;
-  color: #333;
-  background-color: #fbf7f0;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-white);
+  background-color: var(--dark-bg);
 }
 
 .restaurant-header {
   text-align: center;
   margin-bottom: 40px;
   padding: 30px 0;
-  border-bottom: 2px solid #c8a97e;
-  background: linear-gradient(90deg, var(--pastel-green) 0%, var(--pastel-yellow) 100%);
-  color: var(--pastel-text);
+  border-bottom: 2px solid var(--accent-orange);
+  background: var(--dark-grey);
+  color: var(--text-white);
   padding: 24px 0 12px 0;
-  border-bottom: 2px solid var(--pastel-border);
   text-align: center;
 }
 
 .restaurant-header h1 {
   font-size: 3rem;
   margin-bottom: 10px;
-  color: #8b4513;
+  color: var(--accent-orange);
 }
 
 .restaurant-header p {
   font-size: 1.2rem;
   font-style: italic;
-  color: #666;
+  color: var(--text-light);
 }
 
 .menu-container {
@@ -99,10 +100,10 @@ body, .App {
 
 .menu-section {
   margin-bottom: 30px;
-  background-color: #fff;
+  background-color: var(--medium-grey);
   padding: 25px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px var(--shadow);
 }
 
 .menu-section h2 {
@@ -110,9 +111,9 @@ body, .App {
   text-align: center;
   margin-bottom: 25px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #c8a97e;
-  color: var(--pastel-dark-blue);
-  background: var(--pastel-yellow);
+  border-bottom: 1px solid var(--accent-orange);
+  color: var(--accent-orange);
+  background: var(--dark-grey);
   border-radius: 8px;
   padding: 8px 0 8px 12px;
   margin-bottom: 12px;
@@ -125,9 +126,9 @@ body, .App {
 }
 
 .menu-item {
-  background: var(--pastel-green);
+  background: var(--light-grey);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(182, 226, 182, 0.08);
+  box-shadow: 0 2px 8px var(--shadow);
   padding: 16px;
   flex: 1 1 220px;
   min-width: 180px;
@@ -135,12 +136,12 @@ body, .App {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border: 1px solid var(--pastel-border);
+  border: 1px solid var(--border-dark);
 }
 
 .menu-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px var(--shadow);
 }
 
 .menu-item-header {
@@ -148,23 +149,23 @@ body, .App {
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 10px;
-  border-bottom: 1px dotted #c8a97e;
+  border-bottom: 1px dotted var(--accent-orange);
   padding-bottom: 8px;
 }
 
 .menu-item h3 {
   margin: 0;
   font-size: 1.3rem;
-  color: #5c3924;
+  color: var(--text-white);
 }
 
 .price {
-  color: var(--pastel-dark-blue);
+  color: var(--accent-orange);
   font-weight: 600;
 }
 
 .description {
-  color: #666;
+  color: var(--text-grey);
   font-style: italic;
   margin-top: 8px;
   font-size: 0.95rem;
@@ -176,20 +177,20 @@ body, .App {
   top: 20px;
   right: 20px;
   padding: 8px 16px;
-  background: var(--pastel-blue);
-  color: var(--pastel-text);
+  background: var(--accent-orange);
+  color: var(--dark-bg);
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   font-size: 1.1rem;
   margin-top: 10px;
-  box-shadow: 0 2px 8px rgba(123, 177, 224, 0.08);
-  transition: background 0.2s;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.2s;
 }
 
 .cart-button:hover {
-  background: var(--pastel-dark-blue);
+  background: #f9a826;
 }
 
 /* Estilos do Carrinho */
@@ -199,12 +200,12 @@ body, .App {
   right: 24px;
   min-width: 340px;
   max-width: 95vw;
-  background: var(--pastel-blue);
+  background: var(--dark-grey);
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(123, 177, 224, 0.18);
+  box-shadow: 0 4px 24px var(--shadow);
   z-index: 1000;
   padding-bottom: 24px;
-  border: 1.5px solid var(--pastel-border);
+  border: 1.5px solid var(--border-dark);
 }
 
 .cart-header {
@@ -212,12 +213,12 @@ body, .App {
   justify-content: space-between;
   align-items: center;
   padding: 20px 20px 10px 20px;
-  background: var(--pastel-yellow);
+  background: var(--accent-orange);
   border-radius: 12px 12px 0 0;
 }
 
 .cart-header h2 {
-  color: #8b4513;
+  color: var(--dark-bg);
   margin: 0;
 }
 
@@ -225,13 +226,13 @@ body, .App {
   background: none;
   border: none;
   font-size: 24px;
-  color: #8b4513;
+  color: var(--dark-bg);
   cursor: pointer;
 }
 
 .empty-cart {
   text-align: center;
-  color: #888;
+  color: var(--text-grey);
   margin: 40px 0;
   font-style: italic;
 }
@@ -245,18 +246,18 @@ body, .App {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--pastel-border);
+  border-bottom: 1px solid var(--border-dark);
   padding: 12px 0;
 }
 
 .cart-item-info h4 {
   margin: 0 0 5px;
-  color: #5c3924;
+  color: var(--text-white);
 }
 
 .item-price {
   margin: 0;
-  color: #8b4513;
+  color: var(--accent-orange);
   font-weight: bold;
 }
 
@@ -281,7 +282,7 @@ body, .App {
 .remove-button {
   background: none !important;
   border: none !important;
-  color: #ff5252;
+  color: var(--accent-orange);
   cursor: pointer;
   font-size: 16px;
   margin-left: 5px;
@@ -303,7 +304,7 @@ body, .App {
 }
 
 .total-price {
-  color: #8b4513;
+  color: var(--accent-orange);
 }
 
 .cart-actions {
@@ -321,36 +322,36 @@ body, .App {
 }
 
 .clear-cart {
-  background: var(--pastel-white);
-  color: var(--pastel-text);
-  border: 1px solid var(--pastel-border);
+  background: var(--light-grey);
+  color: var(--text-white);
+  border: 1px solid var(--border-dark);
 }
 
 .confirm-order {
-  background: var(--pastel-green);
-  color: var(--pastel-text);
-  border: 1px solid var(--pastel-border);
+  background: var(--accent-orange);
+  color: var(--dark-bg);
+  border: none;
 }
 
 .confirm-order:hover {
-  background: var(--pastel-accent);
+  background: #f9a826;
 }
 
 .add-to-cart-button {
   margin-top: 10px;
-  background: var(--pastel-yellow);
-  color: var(--pastel-text);
+  background: var(--accent-orange);
+  color: var(--dark-bg);
   border: none;
   border-radius: 4px;
   padding: 10px 0;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
-  box-shadow: 0 1px 4px rgba(255, 249, 196, 0.10);
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
 .add-to-cart-button:hover {
-  background: var(--pastel-accent);
+  background: #f9a826;
 }
 
 /* Ajuste na posição do cabeçalho para acomodar o botão do carrinho */
@@ -362,26 +363,26 @@ body, .App {
 .admin-panel {
   max-width: 700px;
   margin: 40px auto;
-  background: var(--pastel-white);
+  background: var(--dark-grey);
   border-radius: 14px;
-  box-shadow: 0 4px 24px #b3d8f7;
+  box-shadow: 0 4px 24px var(--shadow);
   padding: 32px 28px 32px 28px;
-  color: var(--pastel-text);
+  color: var(--text-white);
 }
 .admin-panel h2 {
   text-align: center;
-  color: var(--pastel-dark-blue);
+  color: var(--accent-orange);
   margin-bottom: 24px;
 }
 .admin-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: var(--pastel-blue);
+  background: var(--light-grey);
   border-radius: 8px;
   padding: 18px 16px 10px 16px;
   margin-bottom: 32px;
-  box-shadow: 0 1px 6px #b3d8f7;
+  box-shadow: 0 1px 6px var(--shadow);
 }
 .admin-form-row {
   display: flex;
@@ -393,22 +394,22 @@ body, .App {
   display: flex;
   flex-direction: column;
   font-weight: 500;
-  color: var(--pastel-dark-blue);
+  color: var(--text-light);
   font-size: 1rem;
 }
 .admin-form input, .admin-form select {
   margin-top: 4px;
-  border: 1px solid var(--pastel-border);
+  border: 1px solid var(--border-dark);
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 1rem;
-  background: #f6fafd;
-  color: var(--pastel-text);
+  background: var(--medium-grey);
+  color: var(--text-white);
 }
 .admin-add-btn {
   margin-top: 8px;
-  background: var(--pastel-green);
-  color: var(--pastel-text);
+  background: var(--accent-orange);
+  color: var(--dark-bg);
   border: none;
   border-radius: 4px;
   padding: 10px 0;
@@ -416,57 +417,57 @@ body, .App {
   font-size: 1.08rem;
   cursor: pointer;
   transition: background 0.2s;
-  box-shadow: 0 1px 4px #b6e2b6;
+  box-shadow: 0 1px 4px var(--shadow);
 }
 .admin-add-btn:hover {
-  background: var(--pastel-accent);
+  background: #f9a826;
 }
 .admin-menu-list {
   margin-top: 18px;
 }
 .admin-menu-category {
-  background: var(--pastel-yellow);
+  background: var(--medium-grey);
   border-radius: 8px;
   margin-bottom: 18px;
   padding: 12px 16px 10px 16px;
-  box-shadow: 0 1px 4px #fff9c4;
+  box-shadow: 0 1px 4px var(--shadow);
 }
 .admin-category-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--pastel-dark-blue);
+  color: var(--accent-orange);
   margin-bottom: 8px;
 }
 .admin-menu-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: #fff;
+  background: var(--light-grey);
   border-radius: 6px;
   margin-bottom: 10px;
   padding: 10px 12px 8px 12px;
-  box-shadow: 0 1px 4px #e0e0e0;
-  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 4px var(--shadow);
+  border: 1px solid var(--border-dark);
 }
 .admin-item-name {
   font-weight: 600;
-  color: var(--pastel-text);
+  color: var(--text-white);
   font-size: 1.05rem;
 }
 .admin-item-price {
   margin-left: 10px;
-  color: var(--pastel-dark-blue);
+  color: var(--accent-orange);
   font-weight: 500;
 }
 .admin-item-desc {
   font-size: 0.97rem;
-  color: #6b7a6b;
+  color: var(--text-grey);
   margin-bottom: 4px;
 }
 .admin-remove-btn {
   align-self: flex-end;
   background: #e57373;
-  color: #fff;
+  color: var(--text-white);
   border: none;
   border-radius: 4px;
   padding: 4px 12px;
@@ -482,7 +483,7 @@ body, .App {
 .admin-back-link {
   display: inline-block;
   margin-top: 18px;
-  color: var(--pastel-dark-blue);
+  color: var(--accent-orange);
   text-decoration: underline;
   font-weight: 600;
   font-size: 1.05rem;
@@ -607,7 +608,7 @@ body, .App {
 }
 
 .menu-item {
-  background: #fff;
+  background: #333333;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   padding: 16px;
