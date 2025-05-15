@@ -822,3 +822,43 @@ nav a {
 nav a:hover {
   text-decoration: underline;
 }
+
+/* Estilos para erros administrativos */
+.admin-error-message {
+  background-color: #e57373;
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-admin {
+  background-color: var(--light-grey);
+  border-radius: 8px;
+  padding: 30px;
+  margin: 40px auto;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.error-admin p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.error-admin button {
+  background-color: var(--accent-orange);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.admin-container {
+  padding: 20px;
+}

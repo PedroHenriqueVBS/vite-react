@@ -9,6 +9,7 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Mapeamento dos garçons para seus números de telefone
   const telefones = {
@@ -97,6 +98,7 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     if (!name || !description || !price) return;
     
     setUploading(true);
+    setError(null);
     
     let formattedPrice = price.trim();
     if (!/^R\$/.test(formattedPrice)) {
@@ -106,22 +108,19 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
     try {
       let imageData = '';
       
-      // Solução temporária: usar base64 se o upload falhar
       if (imageFile) {
         try {
           imageData = await uploadImage(imageFile);
         } catch (error) {
           console.error("Falha no upload, usando base64 como alternativa:", error);
-          imageData = imagePreview; // Usar o base64 do preview
+          imageData = imagePreview;
         }
         
         if (!imageData) {
-          // Se ainda falhar, usar o base64
           imageData = imagePreview;
         }
       }
 
-      // Adicionar item com a URL ou base64 da imagem
       addMenuItem(category, { 
         name, 
         description, 
@@ -129,25 +128,45 @@ function AdminMenu({ menu, addMenuItem, removeMenuItem, garcom, setGarcom, numer
         image: imageData
       });
       
-      // Limpar campos
       setName(''); 
       setDescription(''); 
       setPrice('');
       setImageFile(null);
       setImagePreview('');
       
-      // Limpar input de arquivo
       const fileInput = document.getElementById('dishImageInput');
       if (fileInput) fileInput.value = '';
       
+    } catch (error) {
+      console.error("Erro ao adicionar item:", error);
+      setError("Erro ao adicionar item ao cardápio. Tente novamente.");
     } finally {
       setUploading(false);
     }
   };
 
+  if (!menu) {
+    return (
+      <div className="admin-panel">
+        <h2>Administração do Cardápio</h2>
+        <div className="loading-admin">
+          <p>Carregando dados do cardápio...</p>
+        </div>
+        <Link to="/" className="admin-back-link">Voltar para o site</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-panel">
       <h2>Administração do Cardápio</h2>
+      
+      {error && (
+        <div className="admin-error-message">
+          {error}
+        </div>
+      )}
+      
       <div className="admin-form-row">
         <label>Garçom:
           <select value={garcom} onChange={e => setGarcom(e.target.value)}>

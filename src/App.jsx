@@ -348,15 +348,28 @@ function App() {
             </main>
           </div>
         } />
-        <Route path="/admin" element={menu ? (
-          <AdminMenu 
-            menu={menu} 
-            addMenuItem={addMenuItem} 
-            removeMenuItem={removeMenuItem}
-            garcom={garcom}
-            setGarcom={setGarcom}
-          />
-        ) : <div className="loading-admin">Carregando painel administrativo...</div>} />
+        <Route path="/admin" element={
+          <div className="admin-container">
+            {loadingMenu ? (
+              <div className="loading-admin">
+                <p>Carregando painel administrativo...</p>
+              </div>
+            ) : menu ? (
+              <AdminMenu 
+                menu={menu} 
+                addMenuItem={addMenuItem} 
+                removeMenuItem={removeMenuItem}
+                garcom={garcom}
+                setGarcom={setGarcom}
+              />
+            ) : (
+              <div className="error-admin">
+                <p>Erro ao carregar o painel administrativo. <Link to="/">Voltar para o cardápio</Link></p>
+                <button onClick={() => window.location.reload()}>Tentar novamente</button>
+              </div>
+            )}
+          </div>
+        } />
       </Routes>
     </Router>
   );
